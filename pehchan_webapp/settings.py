@@ -310,6 +310,9 @@ CACHES = {
 }
 
 # Logging Configuration
+is_serverless = 'VERCEL' in os.environ or 'AWS_LAMBDA_FUNCTION_NAME' in os.environ
+active_handlers = ['console'] if (DEBUG or is_serverless) else ['console', 'file']
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -332,7 +335,7 @@ LOGGING = {
         'file': {
             'level': 'ERROR',
             'class': 'logging.FileHandler',
-            'filename': BASE_DIR / 'django_errors.log',
+            'filename': '/tmp/django_errors.log' if is_serverless else BASE_DIR / 'django_errors.log',
             'formatter': 'verbose',
         },
     },
@@ -342,12 +345,12 @@ LOGGING = {
     },
     'loggers': {
         'django': {
-            'handlers': ['console', 'file'] if not DEBUG else ['console'],
+            'handlers': active_handlers,
             'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
             'propagate': False,
         },
         'pehchan': {
-            'handlers': ['console', 'file'] if not DEBUG else ['console'],
+            'handlers': active_handlers,
             'level': 'DEBUG' if DEBUG else 'INFO',
             'propagate': False,
         },
