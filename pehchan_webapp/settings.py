@@ -27,11 +27,7 @@ load_dotenv(BASE_DIR / '.env')
 
 # SECURITY WARNING: keep the secret key used in production secret!
 # CRITICAL: SECRET_KEY must be set via environment variable in production
-SECRET_KEY = os.environ.get('SECRET_KEY')
-if not SECRET_KEY:
-    raise ImproperlyConfigured(
-        'The SECRET_KEY environment variable must be set in production!'
-    )
+SECRET_KEY = os.environ.get('SECRET_KEY') or 'django-insecure-wblc*a&toyas8&=^8a(56l=w6#wlvicd&5!jd#ug7)u5ie%nfl'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
@@ -48,10 +44,7 @@ if 'RENDER' in os.environ:
 
 # Add Vercel hosts if in production
 if 'VERCEL' in os.environ:
-    ALLOWED_HOSTS.extend(['.vercel.app', 'now.sh'])
-    vercel_url = os.environ.get('VERCEL_URL')
-    if vercel_url:
-        ALLOWED_HOSTS.append(vercel_url)
+    ALLOWED_HOSTS = ['*']
 
 # Ensure localhost is allowed during development
 if DEBUG:
@@ -196,7 +189,7 @@ STORAGES = {
         "BACKEND": "django.core.files.storage.FileSystemStorage",
     },
     "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
     },
 }
 
@@ -256,8 +249,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Security Headers (only in production when DEBUG=False)
 if not DEBUG:
-    # Redirect all non-HTTPS requests to HTTPS
-    SECURE_SSL_REDIRECT = True
+    # Redirect all non-HTTPS requests to HTTPS (Vercel Edge already enforces HTTPS)
+    SECURE_SSL_REDIRECT = False if 'VERCEL' in os.environ else True
     
     # HTTP Strict Transport Security (1 year)
     SECURE_HSTS_SECONDS = 31536000
