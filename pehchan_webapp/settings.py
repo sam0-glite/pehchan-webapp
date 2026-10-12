@@ -46,6 +46,13 @@ if 'RENDER' in os.environ:
     if render_host:
         ALLOWED_HOSTS.append(render_host)
 
+# Add Vercel hosts if in production
+if 'VERCEL' in os.environ:
+    ALLOWED_HOSTS.extend(['.vercel.app', 'now.sh'])
+    vercel_url = os.environ.get('VERCEL_URL')
+    if vercel_url:
+        ALLOWED_HOSTS.append(vercel_url)
+
 # Ensure localhost is allowed during development
 if DEBUG:
     ALLOWED_HOSTS = ['*']
@@ -124,11 +131,12 @@ if not DEBUG:
             )
         }
     else:
-        # Fallback to SQLite if no DATABASE_URL is provided
+        # Fallback to SQLite if no DATABASE_URL is provided (use /tmp on Vercel to stay writable)
+        db_file = '/tmp/db.sqlite3' if 'VERCEL' in os.environ else BASE_DIR / 'db.sqlite3'
         DATABASES = {
             'default': {
                 'ENGINE': 'django.db.backends.sqlite3',
-                'NAME': BASE_DIR / 'db.sqlite3',
+                'NAME': db_file,
             }
         }
 else:
@@ -283,6 +291,12 @@ if 'RENDER' in os.environ:
     render_host = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
     if render_host:
         CSRF_TRUSTED_ORIGINS.append(f'https://{render_host}')
+
+if 'VERCEL' in os.environ:
+    CSRF_TRUSTED_ORIGINS.extend(['https://*.vercel.app', 'https://*.now.sh'])
+    vercel_url = os.environ.get('VERCEL_URL')
+    if vercel_url:
+        CSRF_TRUSTED_ORIGINS.append(f'https://{vercel_url}')
 
 env_allowed_hosts = os.environ.get('ALLOWED_HOSTS', '').split(',')
 for host in env_allowed_hosts:
