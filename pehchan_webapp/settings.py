@@ -283,11 +283,16 @@ if 'RENDER' in os.environ:
     render_host = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
     if render_host:
         CSRF_TRUSTED_ORIGINS.append(f'https://{render_host}')
-    
-    env_allowed_hosts = os.environ.get('ALLOWED_HOSTS', '').split(',')
-    for host in env_allowed_hosts:
-        if host and host.strip():
-            CSRF_TRUSTED_ORIGINS.append(f'https://{host.strip()}')
+
+env_allowed_hosts = os.environ.get('ALLOWED_HOSTS', '').split(',')
+for host in env_allowed_hosts:
+    host_clean = host.strip()
+    if host_clean and host_clean != '*':
+        if not host_clean.startswith(('http://', 'https://')):
+            CSRF_TRUSTED_ORIGINS.append(f'https://{host_clean}')
+            CSRF_TRUSTED_ORIGINS.append(f'http://{host_clean}')
+        else:
+            CSRF_TRUSTED_ORIGINS.append(host_clean)
 
 # Caching Configuration
 CACHES = {
