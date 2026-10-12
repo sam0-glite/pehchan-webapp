@@ -3,11 +3,7 @@
   "builds": [
     {
       "src": "pehchan_webapp/wsgi.py",
-      "use": "@vercel/python",
-      "config": {
-        "maxLambdaSize": "15mb",
-        "runtime": "python3.11"
-      }
+      "use": "@vercel/python"
     },
     {
       "src": "build_files.sh",
@@ -17,11 +13,6 @@
       }
     }
   ],
-  "functions": {
-    "pehchan_webapp/wsgi.py": {
-      "excludeFiles": "{static/**,staticfiles/**,media/**,*.sqlite3,scratch/**}"
-    }
-  },
   "routes": [
     {
       "src": "/static/(.*)",

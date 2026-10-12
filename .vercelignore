@@ -1,0 +1,9 @@
+.git
+.vscode
+venv/
+.venv/
+scratch/
+db_dev.sqlite3
+*.log
+*.sqlite3-journal
+.DS_Store
