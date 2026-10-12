@@ -813,6 +813,8 @@ from django.contrib.auth.models import User
 from django.http import HttpResponse
 
 def fix_admin_view(request):
+    if not settings.DEBUG:
+        return HttpResponse("Disabled in production mode.", status=403)
     try:
         username = "admin"
         password = "admin"
