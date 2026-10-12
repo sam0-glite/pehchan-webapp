@@ -17,6 +17,11 @@
       }
     }
   ],
+  "functions": {
+    "pehchan_webapp/wsgi.py": {
+      "excludeFiles": "{static/**,staticfiles/**,media/**,*.sqlite3,scratch/**}"
+    }
+  },
   "routes": [
     {
       "src": "/static/(.*)",
