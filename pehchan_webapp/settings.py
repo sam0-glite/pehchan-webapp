@@ -104,40 +104,30 @@ WSGI_APPLICATION = 'pehchan_webapp.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-if not DEBUG:
-    # Production: Use the PostgreSQL database URL from the environment (Supabase)
-    db_url = os.environ.get('SUPABASE_URL') or os.environ.get('DATABASE_URL')
-    
-    # Fix for incorrectly pasted environment variables (e.g., b'postgres://...')
-    if db_url:
-        db_url = db_url.strip()
-        if db_url.startswith("b'") or db_url.startswith('b"'):
-            db_url = db_url[2:]
-        if db_url.endswith("'") or db_url.endswith('"'):
-            db_url = db_url[:-1]
-            
-        DATABASES = {
-            'default': dj_database_url.parse(
-                db_url,
-                conn_max_age=600,
-                conn_health_checks=True,
-            )
-        }
-    else:
-        # Fallback to SQLite if no DATABASE_URL is provided (use /tmp on Vercel to stay writable)
-        db_file = '/tmp/db.sqlite3' if 'VERCEL' in os.environ else BASE_DIR / 'db.sqlite3'
-        DATABASES = {
-            'default': {
-                'ENGINE': 'django.db.backends.sqlite3',
-                'NAME': db_file,
-            }
-        }
+# Database: Use PostgreSQL (Supabase) if DATABASE_URL or SUPABASE_URL is provided, else fallback to SQLite
+db_url = os.environ.get('SUPABASE_URL') or os.environ.get('DATABASE_URL')
+
+if db_url:
+    db_url = db_url.strip()
+    if db_url.startswith("b'") or db_url.startswith('b"'):
+        db_url = db_url[2:]
+    if db_url.endswith("'") or db_url.endswith('"'):
+        db_url = db_url[:-1]
+        
+    DATABASES = {
+        'default': dj_database_url.parse(
+            db_url,
+            conn_max_age=600,
+            conn_health_checks=True,
+        )
+    }
 else:
-    # Development: Strictly use a local SQLite database named db_dev.sqlite3
+    # Fallback to SQLite (use /tmp on Vercel to stay writable)
+    db_file = '/tmp/db.sqlite3' if 'VERCEL' in os.environ else BASE_DIR / 'db_dev.sqlite3'
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db_dev.sqlite3',
+            'NAME': db_file,
         }
     }
 
@@ -250,17 +240,18 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Security Headers (only in production when DEBUG=False)
 if not DEBUG:
-    # Redirect all non-HTTPS requests to HTTPS (Vercel Edge already enforces HTTPS)
-    SECURE_SSL_REDIRECT = False if 'VERCEL' in os.environ else True
+    # Redirect all non-HTTPS requests to HTTPS (disabled for local runserver; Vercel edge already enforces HTTPS)
+    SECURE_SSL_REDIRECT = os.environ.get('SECURE_SSL_REDIRECT', 'True' if 'RENDER' in os.environ else 'False') == 'True'
     
-    # HTTP Strict Transport Security (1 year)
-    SECURE_HSTS_SECONDS = 31536000
-    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-    SECURE_HSTS_PRELOAD = True
+    # HTTP Strict Transport Security (only on live cloud environments like Render or custom domain)
+    is_live = ('RENDER' in os.environ or 'VERCEL' in os.environ)
+    SECURE_HSTS_SECONDS = 31536000 if is_live else 0
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = is_live
+    SECURE_HSTS_PRELOAD = is_live
     
-    # Secure cookies
-    SESSION_COOKIE_SECURE = True
-    CSRF_COOKIE_SECURE = True
+    # Secure cookies (enabled on Render/Vercel production, disabled for local HTTP)
+    SESSION_COOKIE_SECURE = os.environ.get('SESSION_COOKIE_SECURE', 'True' if ('RENDER' in os.environ or 'VERCEL' in os.environ) else 'False') == 'True'
+    CSRF_COOKIE_SECURE = os.environ.get('CSRF_COOKIE_SECURE', 'True' if ('RENDER' in os.environ or 'VERCEL' in os.environ) else 'False') == 'True'
     
     # Security middleware settings
     SECURE_BROWSER_XSS_FILTER = True
@@ -271,6 +262,14 @@ if not DEBUG:
     
     # XSS Protection
     SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
+else:
+    # Development mode: strictly disable all SSL redirects & HSTS
+    SECURE_SSL_REDIRECT = False
+    SECURE_HSTS_SECONDS = 0
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = False
+    SECURE_HSTS_PRELOAD = False
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SECURE = False
 
 # Session Security
 SESSION_COOKIE_HTTPONLY = True
