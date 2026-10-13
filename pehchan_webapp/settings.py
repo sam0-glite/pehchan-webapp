@@ -35,9 +35,10 @@ if not SECRET_KEY:
         raise ImproperlyConfigured("SECRET_KEY environment variable is required in production.")
     SECRET_KEY = 'django-insecure-wblc*a&toyas8&=^8a(56l=w6#wlvicd&5!jd#ug7)u5ie%nfl'
 
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')
-if not ALLOWED_HOSTS or ALLOWED_HOSTS == ['']:
-    ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [h.strip() for h in os.environ.get('ALLOWED_HOSTS', '').split(',') if h.strip()]
+
+# Whitelist NGO domain names (.in and www)
+ALLOWED_HOSTS.extend(['pehchanyui.in', 'www.pehchanyui.in', '.pehchanyui.in'])
 
 # Add Render host if in production
 if 'RENDER' in os.environ:
@@ -51,6 +52,9 @@ if 'VERCEL' in os.environ:
     vercel_url = os.environ.get('VERCEL_URL')
     if vercel_url:
         ALLOWED_HOSTS.append(vercel_url)
+
+# Remove duplicates while preserving list
+ALLOWED_HOSTS = list(dict.fromkeys(ALLOWED_HOSTS))
 
 # Ensure localhost is allowed during development
 if DEBUG:

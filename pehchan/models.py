@@ -82,8 +82,8 @@ class EventVolunteer(models.Model):
     ]
     
     phone_regex = RegexValidator(
-        regex=r'^\d{10}$',
-        message="Contact number must be exactly 10 digits."
+        regex=r'^[6-9]\d{9}$',
+        message="Contact number must be a valid 10-digit Indian mobile number starting with 6, 7, 8, or 9."
     )
     
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='event_volunteers')
@@ -110,8 +110,8 @@ class LifetimeVolunteer(models.Model):
     ]
     
     phone_regex = RegexValidator(
-        regex=r'^\d{10}$',
-        message="Contact number must be exactly 10 digits."
+        regex=r'^[6-9]\d{9}$',
+        message="Contact number must be a valid 10-digit Indian mobile number starting with 6, 7, 8, or 9."
     )
     
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='lifetime_volunteer')
@@ -224,8 +224,8 @@ class MoneyDonation(models.Model):
     ]
     
     phone_regex = RegexValidator(
-        regex=r'^\d{10}$',
-        message="Contact number must be exactly 10 digits."
+        regex=r'^[6-9]\d{9}$',
+        message="Contact number must be a valid 10-digit Indian mobile number starting with 6, 7, 8, or 9."
     )
     
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='money_donations')

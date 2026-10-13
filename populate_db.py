@@ -101,7 +101,7 @@ def populate():
         user=volunteer_user,
         event=event,
         defaults={
-            'contact_number': '9876543210',
+            'contact_number': '9820112233',
             'status': 'approved',
             'attended': True
         }
@@ -111,6 +111,7 @@ def populate():
     else:
         vol_entry.status = 'approved'
         vol_entry.attended = True
+        vol_entry.contact_number = '9820112233'
         vol_entry.save()
         print(f"[*] Volunteer '{volunteer_user.username}' record confirmed for '{event.name}'.")
 
@@ -118,7 +119,7 @@ def populate():
     lt_vol, created_lt = LifetimeVolunteer.objects.get_or_create(
         user=volunteer_user,
         defaults={
-            'contact_number': '9876543210',
+            'contact_number': '9820112233',
             'motivation': 'Dedicated to empowering underprivileged children through continuous grassroots volunteering.',
             'status': 'approved',
             'reviewed_by': admin_user

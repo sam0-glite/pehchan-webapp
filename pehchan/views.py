@@ -845,3 +845,28 @@ def issue_volunteer_certificate(request, volunteer_id):
         'certificate_type': 'Volunteer'
     })
 
+
+# ==============================================================================
+# CUSTOM HTTP ERROR HANDLERS (400, 403, 404, 500)
+# ==============================================================================
+
+def error_400_view(request, exception=None):
+    """Custom view for HTTP 400 Bad Request"""
+    return render(request, '400.html', status=400)
+
+
+def error_403_view(request, exception=None):
+    """Custom view for HTTP 403 Forbidden / Permission Denied"""
+    return render(request, '403.html', status=403)
+
+
+def error_404_view(request, exception=None):
+    """Custom view for HTTP 404 Page Not Found"""
+    return render(request, '404.html', status=404)
+
+
+def error_500_view(request):
+    """Custom view for HTTP 500 Internal Server Error"""
+    return render(request, '500.html', status=500)
+
+

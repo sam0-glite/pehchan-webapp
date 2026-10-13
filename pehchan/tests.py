@@ -211,3 +211,39 @@ class SecurityVulnerabilitiesTestCase(TestCase):
         # Should not raise exception
         validate_receipt_file(valid_file)
 
+
+class CustomErrorPagesTests(TestCase):
+    def setUp(self):
+        from django.test import RequestFactory
+        self.factory = RequestFactory()
+
+    def test_custom_400_template_rendering(self):
+        from pehchan.views import error_400_view
+        request = self.factory.get('/some-bad-request')
+        response = error_400_view(request)
+        self.assertEqual(response.status_code, 400)
+        self.assertContains(response, 'Bad Request', status_code=400)
+        self.assertContains(response, '400', status_code=400)
+
+    def test_custom_403_template_rendering(self):
+        from pehchan.views import error_403_view
+        request = self.factory.get('/forbidden')
+        response = error_403_view(request)
+        self.assertEqual(response.status_code, 403)
+        self.assertContains(response, '403', status_code=403)
+
+    def test_custom_404_template_rendering(self):
+        from pehchan.views import error_404_view
+        request = self.factory.get('/nonexistent-page-xyz')
+        response = error_404_view(request)
+        self.assertEqual(response.status_code, 404)
+        self.assertContains(response, '404', status_code=404)
+
+    def test_custom_500_template_rendering(self):
+        from pehchan.views import error_500_view
+        request = self.factory.get('/server-error')
+        response = error_500_view(request)
+        self.assertEqual(response.status_code, 500)
+        self.assertContains(response, '500', status_code=500)
+
+
