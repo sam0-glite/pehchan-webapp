@@ -321,8 +321,10 @@
             text-align: right;
         }
 
-        .nav-container { justify-content: center !important; }
-        .nav-links { margin-left: 0 !important; margin-right: 80px !important; }
+        @media (min-width: 769px) {
+            .nav-container { justify-content: center !important; }
+            .nav-links { margin-left: 0 !important; margin-right: 80px !important; }
+        }
 
         @media (max-width: 992px) {
             .event-main-content { grid-template-columns: 1fr; gap: 3rem; }

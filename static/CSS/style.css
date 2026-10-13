@@ -1967,26 +1967,49 @@ html {
 
     .mobile-menu-toggle {
         display: flex;
+        z-index: 1002;
     }
 
     .nav-links {
         position: fixed;
-        top: 70px;
+        top: 0;
         left: -100%;
-        width: 100%;
-        height: calc(100vh - 70px);
-        background: #fff;
+        width: 80%;
+        max-width: 320px;
+        height: 100vh;
+        background: #ffffff;
         flex-direction: column;
         justify-content: flex-start;
-        padding: 2rem;
-        gap: 2rem;
+        align-items: flex-start;
+        padding: 5rem 2rem 2rem;
+        gap: 1.5rem;
         transition: left 0.3s ease;
-        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-        z-index: 999;
+        box-shadow: 4px 0 25px rgba(0, 0, 0, 0.15);
+        z-index: 1001;
+        overflow-y: auto;
     }
 
     .nav-links.active {
         left: 0;
+    }
+
+    /* Force links inside mobile drawer to be dark and visible */
+    .nav-links a,
+    .home .nav-links a,
+    .navbar.navbar-solid .nav-links a {
+        color: #1a1f1e !important;
+        font-size: 1.05rem;
+        font-weight: 600;
+        display: block;
+        width: 100%;
+        padding: 8px 0;
+    }
+
+    .nav-links a:hover,
+    .home .nav-links a:hover,
+    .nav-links a.active,
+    .home .nav-links a.active {
+        color: #F9A826 !important;
     }
 
     .donate-btn {

@@ -107,16 +107,17 @@
         }
 
         /* Center Navbar Content */
-        .nav-container {
-            justify-content: center !important;
-        }
+        /* Center Navbar Content on Desktop */
+        @media (min-width: 769px) {
+            .nav-container {
+                justify-content: center !important;
+            }
 
-        .nav-links {
-            margin-left: 0 !important;
-            margin-right: 80px !important;
+            .nav-links {
+                margin-left: 0 !important;
+                margin-right: 80px !important;
+            }
         }
-
-        /* Removed redundant local image styles - handled globally by style.css */
     </style>
 
 </head>
@@ -136,8 +137,8 @@
                 {% if user.is_authenticated %}
                 <li><a href="{% url 'dashboard' %}">DASHBOARD</a></li>
                 {% else %}
-                <li><a class="mdl-navigation__link" href="{% url 'login' %}">Login</a></li>
-                <li><a class="mdl-navigation__link" href="{% url 'signup' %}">Sign Up</a></li>
+                <li><a href="{% url 'login' %}">LOGIN</a></li>
+                <li><a href="{% url 'signup' %}">SIGN UP</a></li>
                 {% endif %}
             </ul>
             <a href="{% if user.is_authenticated %}{% url 'money_donation' %}{% else %}{% url 'public_donate' %}#support{% endif %}"
