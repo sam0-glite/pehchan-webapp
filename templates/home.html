@@ -6,7 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pehchan - Your Unique Identity</title>
+    <title>Pehchan YUI Foundation</title>
     <link rel="stylesheet" href="{% static 'CSS/style.css' %}?v=3">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
@@ -162,7 +162,7 @@
         <div class="hero-content">
             <img src="{% static 'images/PEHCHANlogo.png' %}" class="hero-logo" alt="Pehchan Logo">
             <h1 class="hero-title-green">Pehchan</h1>
-            <h2 class="hero-title-blue">Your Unique Identity</h2>
+            <h2 class="hero-title-blue">YUI Foundation</h2>
             <div class="hero-buttons">
                 <a href="{% if user.is_authenticated %}{% url 'lifetime_volunteer' %}{% else %}{% url 'public_volunteer' %}{% endif %}"
                     class="btn-join">JOIN US</a>
@@ -179,7 +179,7 @@
         <img src="{% static 'images/pink_leaf.png' %}" class="leaf-decor leaf-bottom-left" alt="">
         <img src="{% static 'images/blue_leaf.png' %}" class="leaf-decor leaf-bottom-right" alt="">
         <div class="container">
-            <p class="about-intro">Established in 2020, Pehchan-your unique identity is a non-profit organisation
+            <p class="about-intro">Established in 2020, Pehchan YUI Foundation is a non-profit organisation
                 focused on the education of underprivileged children and helping the homeless.</p>
         </div>
     </section>
@@ -192,12 +192,10 @@
             <h2 class="section-title-orange">OUR CAUSE</h2>
             <div class="cause-grid">
                 <div class="cause-card">
-                    <img src="{% static 'images/home/education/screenshot_education_1.png' %}"
-                        alt="Education">
+                    <img src="{% static 'images/home/education/screenshot_education_1.png' %}" alt="Education">
                 </div>
                 <div class="cause-card">
-                    <img src="{% static 'images/home/education/screenshot_education_2.png' %}"
-                        alt="Education">
+                    <img src="{% static 'images/home/education/screenshot_education_2.png' %}" alt="Education">
                 </div>
                 <div class="cause-card">
                     <img src="{% static 'images/home/education/17.png' %}" alt="Community">
@@ -242,8 +240,7 @@
                 <div class="activity-images">
 
                     <div class="activity-images-row">
-                        <img src="{% static 'images/events/environments/11.png' %}"
-                            alt="Environment Protection">
+                        <img src="{% static 'images/events/environments/11.png' %}" alt="Environment Protection">
                         <img src="{% static 'images/events/environments/2.png' %}" alt="Environment Protection">
                     </div>
                     <div class="activity-images-row">
@@ -413,7 +410,7 @@
         </div>
     </footer>
     <div class="footer-bottom">
-        <p>Copyright © Pehchan-Your Unique Identity. All rights reserved.</p>
+        <p>Copyright © Pehchan YUI Foundation. All rights reserved.</p>
     </div>
 
     <script src="{% static 'js/script.js' %}?v=2"></script>

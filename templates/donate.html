@@ -305,7 +305,7 @@
         <div class="hero-content">
             <img src="{% static 'images/PEHCHANlogo.png' %}" class="hero-logo" alt="Pehchan Logo">
             <h1 class="hero-title-green">Pehchan</h1>
-            <h2 class="hero-title-blue">Your Unique Identity</h2>
+            <h2 class="hero-title-blue">YUI Foundation</h2>
             <div class="hero-buttons">
                 <a href="{% if user.is_authenticated %}{% url 'lifetime_volunteer' %}{% else %}{% url 'public_volunteer' %}{% endif %}"
                     class="btn-join">JOIN US</a>
@@ -375,29 +375,34 @@
                     <p style="color: #666; margin-bottom: 30px;">Support our cause without creating an account. Your
                         contribution makes a difference!</p>
 
-                        <div class="form-section" style="max-width: 600px; margin: 0 auto; grid-column: span 2;">
-                            <h3><span class="material-icons">qr_code_scanner</span> Donate via UPI</h3>
-                            <p style="color: #666; font-size: 14px; margin-bottom: 25px;">Scan the QR code or use the
-                                UPI ID to make your payment</p>
+                    <div class="form-section" style="max-width: 600px; margin: 0 auto; grid-column: span 2;">
+                        <h3><span class="material-icons">qr_code_scanner</span> Donate via UPI</h3>
+                        <p style="color: #666; font-size: 14px; margin-bottom: 25px;">Scan the QR code or use the
+                            UPI ID to make your payment</p>
 
-                            <div class="qr-code-container">
-                                <img src="{% static 'images/pehchan_QRcode.jpeg' %}" alt="Pehchan QR Code" style="max-width: 220px; height: auto; border-radius: 8px; display: block;">
-                                <p style="margin: 20px 0 8px 0; font-weight: 700; color: #1a1a1a; font-size: 1.2rem; letter-spacing: -0.5px;">Scan QR Code to Pay</p>
-                                <p style="margin: 0; font-size: 14px; color: #666; font-weight: 500;">Any UPI app works</p>
-                            </div>
+                        <div class="qr-code-container">
+                            <img src="{% static 'images/pehchan_QRcode.jpeg' %}" alt="Pehchan QR Code"
+                                style="max-width: 220px; height: auto; border-radius: 8px; display: block;">
+                            <p
+                                style="margin: 20px 0 8px 0; font-weight: 700; color: #1a1a1a; font-size: 1.2rem; letter-spacing: -0.5px;">
+                                Scan QR Code to Pay</p>
+                            <p style="margin: 0; font-size: 14px; color: #666; font-weight: 500;">Any UPI app works</p>
+                        </div>
 
-                            <div class="upi-id-box">
-                                <p style="margin: 0; font-size: 14px; font-weight: 500;">UPI ID: <span
-                                        style="font-family: monospace; font-size: 16px;">anikshaupadhyay2001@okicici</span></p>
+                        <div class="upi-id-box">
+                            <p style="margin: 0; font-size: 14px; font-weight: 500;">UPI ID: <span
+                                    style="font-family: monospace; font-size: 16px;">anikshaupadhyay2001@okicici</span>
+                            </p>
                         </div>
 
                         <div class="note-box">
-                            <p>💡 <strong>Note:</strong> For tax benefits and tracking, we recommend creating a free account
+                            <p>💡 <strong>Note:</strong> For tax benefits and tracking, we recommend creating a free
+                                account
                                 and using the regular donation process.</p>
                         </div>
+                    </div>
                 </div>
             </div>
-        </div>
     </section>
 
     <script>
@@ -466,7 +471,7 @@
         </div>
     </footer>
     <div class="footer-bottom">
-        <p>Copyright © Pehchan-Your Unique Identity. All rights reserved.</p>
+        <p>Copyright © Pehchan YUI Foundation. All rights reserved.</p>
     </div>
 
     <script src="{% static 'js/script.js' %}"></script>
