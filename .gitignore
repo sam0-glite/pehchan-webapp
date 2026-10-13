@@ -19,7 +19,7 @@ media/
 staticfiles/
 *.log
 django_errors.log
-db.sqlite3
+*.sqlite3
 *.sqlite3-journal
 
 # OS & Editor files

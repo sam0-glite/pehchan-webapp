@@ -27,10 +27,13 @@ load_dotenv(BASE_DIR / '.env')
 
 # SECURITY WARNING: keep the secret key used in production secret!
 # CRITICAL: SECRET_KEY must be set via environment variable in production
-SECRET_KEY = os.environ.get('SECRET_KEY') or 'django-insecure-wblc*a&toyas8&=^8a(56l=w6#wlvicd&5!jd#ug7)u5ie%nfl'
-
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+
+SECRET_KEY = os.environ.get('SECRET_KEY')
+if not SECRET_KEY:
+    if not DEBUG:
+        raise ImproperlyConfigured("SECRET_KEY environment variable is required in production.")
+    SECRET_KEY = 'django-insecure-wblc*a&toyas8&=^8a(56l=w6#wlvicd&5!jd#ug7)u5ie%nfl'
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')
 if not ALLOWED_HOSTS or ALLOWED_HOSTS == ['']:
@@ -44,7 +47,10 @@ if 'RENDER' in os.environ:
 
 # Add Vercel hosts if in production
 if 'VERCEL' in os.environ:
-    ALLOWED_HOSTS = ['*']
+    ALLOWED_HOSTS.extend(['.vercel.app', '.now.sh'])
+    vercel_url = os.environ.get('VERCEL_URL')
+    if vercel_url:
+        ALLOWED_HOSTS.append(vercel_url)
 
 # Ensure localhost is allowed during development
 if DEBUG:
@@ -135,8 +141,23 @@ else:
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 
-# Removed all password validators to allow users to set any password
-AUTH_PASSWORD_VALIDATORS = []
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'OPTIONS': {
+            'min_length': 8,
+        }
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    },
+]
 
 
 # Internationalization

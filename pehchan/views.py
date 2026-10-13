@@ -631,31 +631,39 @@ class MoneyDonationCreateView(LoginRequiredMixin, CreateView):
 
 
 def forgot_password(request):
-    """Handle forgot password request"""
+    """Handle forgot password request with rate limiting and generic response"""
     if request.method == 'POST':
         form = ForgotPasswordForm(request.POST)
         if form.is_valid():
             email = form.cleaned_data['email']
+            
+            # Simple rate limiting per session (cooldown of 60 seconds)
+            last_request_time = request.session.get('last_otp_request_time')
+            now_ts = timezone.now().timestamp()
+            if last_request_time and (now_ts - last_request_time) < 60:
+                messages.warning(request, 'Please wait at least 60 seconds before requesting another OTP.')
+                return render(request, 'forgot_password.html', {'form': form})
+            
             try:
                 user = User.objects.get(email=email)
                 
-                # Delete any existing OTPs for this user to prevent confusion and database bloat
+                # Delete existing OTPs for this user
                 PasswordResetOTP.objects.filter(user=user).delete()
                 
-                # Generate a 6-digit OTP
-                otp = ''.join(random.choices(string.digits, k=6))
+                # Cryptographically secure random 6-digit OTP
+                import secrets
+                otp = f"{secrets.randbelow(900000) + 100000}"
                 
-                # Set expiration time (10 minutes from now)
+                # Expiration time (10 minutes)
                 expires_at = timezone.now() + timedelta(minutes=10)
                 
-                # Save OTP to database
+                # Save OTP
                 PasswordResetOTP.objects.create(
                     user=user,
                     otp=otp,
                     expires_at=expires_at
                 )
                 
-                # Send OTP via email
                 subject = 'Pehchan - Password Reset OTP'
                 message = f"""
                 Hello {user.username},
@@ -680,19 +688,23 @@ def forgot_password(request):
                         [email],
                         fail_silently=False,
                     )
-                except Exception as e:
-                    # Clean up OTP if email fails
+                except Exception:
                     PasswordResetOTP.objects.filter(user=user, otp=otp).delete()
                     messages.error(request, 'Failed to send OTP email. Please try again later or contact support.')
                     return redirect('forgot_password')
                 
-                # Store user ID in session for later use
                 request.session['reset_user_id'] = user.id
+                request.session['otp_initiated'] = True
+                request.session['otp_attempts'] = 0
+                request.session['last_otp_request_time'] = now_ts
                 
-                messages.success(request, 'An OTP has been sent to your email address.')
+                messages.success(request, 'If an account exists with this email address, an OTP has been sent.')
                 return redirect('verify_otp')
             except User.DoesNotExist:
-                messages.error(request, 'No user found with this email address.')
+                request.session['otp_initiated'] = True
+                request.session['last_otp_request_time'] = now_ts
+                messages.success(request, 'If an account exists with this email address, an OTP has been sent.')
+                return redirect('verify_otp')
     else:
         form = ForgotPasswordForm()
     
@@ -700,9 +712,20 @@ def forgot_password(request):
 
 
 def verify_otp(request):
-    """Verify OTP for password reset"""
-    if 'reset_user_id' not in request.session:
+    """Verify OTP for password reset with attempt throttling (max 5 attempts)"""
+    if not request.session.get('otp_initiated'):
         messages.error(request, 'Invalid request. Please try again.')
+        return redirect('forgot_password')
+    
+    # Enforce attempt limit
+    attempts = request.session.get('otp_attempts', 0)
+    if attempts >= 5:
+        user_id = request.session.get('reset_user_id')
+        if user_id:
+            PasswordResetOTP.objects.filter(user_id=user_id).delete()
+        request.session.pop('reset_user_id', None)
+        request.session.pop('otp_attempts', None)
+        messages.error(request, 'Too many incorrect attempts. Please request a new OTP.')
         return redirect('forgot_password')
     
     if request.method == 'POST':
@@ -713,18 +736,26 @@ def verify_otp(request):
             
             try:
                 user = User.objects.get(id=user_id)
-                # Check if OTP exists and is valid
                 otp_record = PasswordResetOTP.objects.filter(user=user, otp=otp).first()
                 
                 if otp_record and otp_record.is_valid():
-                    # OTP is valid, remove it from database
                     otp_record.delete()
-                    # Store user ID in session for password reset
+                    request.session['otp_verified'] = True
                     request.session['reset_user_id'] = user.id
+                    request.session.pop('otp_attempts', None)
                     messages.success(request, 'OTP verified successfully.')
                     return redirect('reset_password')
                 else:
-                    messages.error(request, 'Invalid or expired OTP. Please try again.')
+                    request.session['otp_attempts'] = attempts + 1
+                    remaining = 5 - (attempts + 1)
+                    if remaining > 0:
+                        messages.error(request, f'Invalid or expired OTP. You have {remaining} attempt(s) remaining.')
+                    else:
+                        otp_record_to_del = PasswordResetOTP.objects.filter(user=user).delete()
+                        request.session.pop('reset_user_id', None)
+                        request.session.pop('otp_attempts', None)
+                        messages.error(request, 'Too many incorrect attempts. Please request a new OTP.')
+                        return redirect('forgot_password')
             except User.DoesNotExist:
                 messages.error(request, 'Invalid request. Please try again.')
                 return redirect('forgot_password')
@@ -736,31 +767,38 @@ def verify_otp(request):
 
 def reset_password(request):
     """Reset password after OTP verification"""
-    if 'reset_user_id' not in request.session:
+    if 'reset_user_id' not in request.session or not request.session.get('otp_verified'):
+        messages.error(request, 'Please verify your OTP first.')
+        return redirect('forgot_password')
+    
+    user_id = request.session['reset_user_id']
+    try:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        request.session.pop('reset_user_id', None)
+        request.session.pop('otp_verified', None)
         messages.error(request, 'Invalid request. Please try again.')
         return redirect('forgot_password')
     
     if request.method == 'POST':
-        form = ResetPasswordForm(request.POST)
+        form = ResetPasswordForm(request.POST, user=user)
         if form.is_valid():
             new_password = form.cleaned_data['new_password']
-            user_id = request.session['reset_user_id']
+            user.set_password(new_password)
+            user.save()
             
-            try:
-                user = User.objects.get(id=user_id)
-                user.set_password(new_password)
-                user.save()
-                
-                # Clear session
-                del request.session['reset_user_id']
-                
-                messages.success(request, 'Your password has been reset successfully. You can now login with your new password.')
-                return redirect('login')
-            except User.DoesNotExist:
-                messages.error(request, 'Invalid request. Please try again.')
-                return redirect('forgot_password')
+            # Clear reset session state
+            request.session.pop('reset_user_id', None)
+            request.session.pop('otp_verified', None)
+            
+            messages.success(request, 'Your password has been reset successfully. You can now login with your new password.')
+            return redirect('login')
+        else:
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, error)
     else:
-        form = ResetPasswordForm()
+        form = ResetPasswordForm(user=user)
     
     return render(request, 'reset_password.html', {'form': form})
 
@@ -807,26 +845,3 @@ def issue_volunteer_certificate(request, volunteer_id):
         'certificate_type': 'Volunteer'
     })
 
-
-
-from django.contrib.auth.models import User
-from django.http import HttpResponse
-
-def fix_admin_view(request):
-    if not settings.DEBUG:
-        return HttpResponse("Disabled in production mode.", status=403)
-    try:
-        username = "admin"
-        password = "admin"
-        if User.objects.filter(username=username).exists():
-            user = User.objects.get(username=username)
-            user.set_password(password)
-            user.is_staff = True
-            user.is_superuser = True
-            user.save()
-            return HttpResponse("Admin user updated successfully. You can now login with admin / admin")
-        else:
-            User.objects.create_superuser(username=username, email="admin@pehchanyui.in", password=password)
-            return HttpResponse("Admin user created successfully. You can now login with admin / admin")
-    except Exception as e:
-        return HttpResponse(f"Error: {e}")

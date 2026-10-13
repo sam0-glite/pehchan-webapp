@@ -315,6 +315,10 @@ class OTPVerificationForm(forms.Form):
     )
 
 
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError as DjangoValidationError
+
+
 class ResetPasswordForm(forms.Form):
     """Form for resetting password"""
     new_password = forms.CharField(
@@ -331,6 +335,19 @@ class ResetPasswordForm(forms.Form):
             'required': True
         })
     )
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+
+    def clean_new_password(self):
+        new_password = self.cleaned_data.get('new_password')
+        if new_password:
+            try:
+                validate_password(new_password, user=self.user)
+            except DjangoValidationError as error:
+                raise forms.ValidationError(error.messages)
+        return new_password
 
     def clean(self):
         cleaned_data = super().clean()
