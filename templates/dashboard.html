@@ -134,9 +134,7 @@
     {% endif %}
 </div>
 
-{% with upcoming_count=upcoming_events|length joined_count=joined_events|length certificate_count=certificates|length
-donor_cert_count=donor_certificates|length material_count=material_donations|length money_count=money_donations|length
-%}
+{% with upcoming_count=upcoming_events|length joined_count=joined_events|length certificate_count=certificates|length donor_cert_count=donor_certificates|length material_count=material_donations|length money_count=money_donations|length %}
 <div class="metric-strip">
     <div class="metric-card">
         <span class="metric-label">Upcoming Events</span>
