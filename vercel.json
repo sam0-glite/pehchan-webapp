@@ -11,5 +11,10 @@
       "src": "/(.*)",
       "dest": "pehchan_webapp/wsgi.py"
     }
-  ]
+  ],
+  "functions": {
+    "pehchan_webapp/wsgi.py": {
+      "excludeFiles": "{media/**,staticfiles/**,scratch/**,*.md,*.log,*.sqlite3}"
+    }
+  }
 }
