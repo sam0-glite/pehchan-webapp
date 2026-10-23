@@ -24,7 +24,10 @@ handler403 = 'pehchan.views.error_403_view'
 handler404 = 'pehchan.views.error_404_view'
 handler500 = 'pehchan.views.error_500_view'
 
+from django.views.generic.base import RedirectView
+
 urlpatterns = [
+    path('favicon.ico', RedirectView.as_view(url=settings.STATIC_URL + 'images/favicon.ico', permanent=True)),
     path('admin/', admin.site.urls),
     path('', include('pehchan.urls')),
 ]
